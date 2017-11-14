@@ -36,7 +36,7 @@ function buy() {
           choices: function() {
             var choiceArray = [];
             for (var i = 0; i < results.length; i++) {
-              choiceArray.push(results[i].product_name);
+              choiceArray.push("ID: " + results[i].item_id + " |Item name: " + results[i].product_name + " |Department: " + results[i].department_name + " |Price: $" + results[i].price + " |Quantity Available: " + results[i].stock_quantity);
             }
             return choiceArray;
           },
