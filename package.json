@@ -15,5 +15,9 @@
   "bugs": {
     "url": "https://github.com/GRIFF91/bamazon/issues"
   },
-  "homepage": "https://github.com/GRIFF91/bamazon#readme"
+  "homepage": "https://github.com/GRIFF91/bamazon#readme",
+  "dependencies": {
+    "inquirer": "^4.0.0",
+    "mysql": "^2.15.0"
+  }
 }
