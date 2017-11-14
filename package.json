@@ -1,0 +1,19 @@
+{
+  "name": "bamazon",
+  "version": "1.0.0",
+  "description": "",
+  "main": "cli.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/GRIFF91/bamazon.git"
+  },
+  "author": "Byron Griffith",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/GRIFF91/bamazon/issues"
+  },
+  "homepage": "https://github.com/GRIFF91/bamazon#readme"
+}
