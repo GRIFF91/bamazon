@@ -1,6 +1,6 @@
 var mysql = require("mysql");
 var inquirer = require("inquirer");
-var cli_table = require("cli-table");
+var Table = require("cli-table");
 
 // create the connection information for the sql database
 var connection = mysql.createConnection({
@@ -20,14 +20,39 @@ connection.connect(function(err) {
   if (err) throw err;
   // run the start function after the connection is made to prompt the user
   console.log("Welcome to Bamazon!");
+  tableView();
   buy();
 });
 
+// function that displays table
+function tableView() {
+	connection.query("SELECT item_id, product_name, department_name, price, stock_quantity FROM products", function(err, results) {
+    if (err) throw err;
+
+// instantiate 
+	var table = new Table({
+    	head: ['ID#', 'Item Name', 'Department', 'Price($)', 'Quantity Available'],
+  	    colWidths: [10, 20, 20, 20, 20]
+	});
+
+	for(var i = 0; i < results.length; i++){
+		table.push(
+			[results[i].item_id, results[i].product_name, results[i].department_name, results[i].price, results[i].stock_quantity]
+		);
+	}
+	console.log(table.toString());
+
+	// purchase();
+
+  });
+}
+
+// function to start a purchase
 function buy() {
-  // query the database for all items being auctioned
+  // query the database for all items
   connection.query("SELECT * FROM products", function(err, results) {
     if (err) throw err;
-    // once you have the items, prompt the user for which they'd like to bid on
+    // once you have the items, prompt the user for which they'd like to buy
     inquirer
       .prompt([
         {
@@ -36,7 +61,7 @@ function buy() {
           choices: function() {
             var choiceArray = [];
             for (var i = 0; i < results.length; i++) {
-              choiceArray.push("ID: " + results[i].item_id + " |Item name: " + results[i].product_name + " |Department: " + results[i].department_name + " |Price: $" + results[i].price + " |Quantity Available: " + results[i].stock_quantity);
+              choiceArray.push("ID: " + results[i].item_id + " | " + results[i].product_name);
             }
             return choiceArray;
           },
