@@ -29,12 +29,17 @@ function tableView() {
 	connection.query("SELECT item_id, product_name, department_name, price, stock_quantity FROM products", function(err, results) {
     if (err) throw err;
 
-// instantiate 
+// table 
 	var table = new Table({
     	head: ['ID#', 'Item Name', 'Department', 'Price($)', 'Quantity Available'],
-  	    colWidths: [10, 20, 20, 20, 20]
+  	    colWidths: [10, 20, 20, 20, 20],
+  	    style: {
+			head: ['cyan'],
+			compact: false,
+			colAligns: ['center'],
+		}
 	});
-
+//Loop through the data
 	for(var i = 0; i < results.length; i++){
 		table.push(
 			[results[i].item_id, results[i].product_name, results[i].department_name, results[i].price, results[i].stock_quantity]
