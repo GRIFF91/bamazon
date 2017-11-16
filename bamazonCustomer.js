@@ -1,5 +1,6 @@
 var mysql = require("mysql");
 var inquirer = require("inquirer");
+var colors = require("colors");
 var Table = require("cli-table");
 
 // create the connection information for the sql database
@@ -19,9 +20,12 @@ var connection = mysql.createConnection({
 connection.connect(function(err) {
   if (err) throw err;
   // run the start function after the connection is made to prompt the user
-  console.log("Welcome to Bamazon!");
+  console.log("                           ".bgGreen.white);
+  console.log("    Welcome to Bamazon!    ".bgGreen.white);
+  console.log("                           ".bgGreen.white);
   tableView();
   buy();
+  // continueShopping();
 });
 
 // function that displays table
@@ -61,12 +65,12 @@ function buy() {
         {
           name: "choice",
           type: "input",
-          message: "Please input the ID# of the product you want to buy?"
+          message: "Please input the ID# of the product you want to buy?".bgGreen.white
         },
         {
           name: "amount",
           type: "input",
-          message: "How many would you like to buy?"
+          message: "How many would you like to buy?".bgGreen.white
         }
       ])
       .then(function(input) {
@@ -74,46 +78,56 @@ function buy() {
         var item = input.choice;
         var quantity = input.amount;
 
-    // Query db to confirm that the given item ID exists in the desired quantity
-    var queryStr = 'SELECT * FROM products WHERE ?';
+        // Query db to confirm that the given item ID exists in the desired quantity
+        var queryStr = 'SELECT * FROM products WHERE ?';
 
-    connection.query(queryStr, {item_id: item}, function(err, data) {
-      if (err) throw err;
+        connection.query(queryStr, {item_id: item}, function(err, data) {
+          if (err) throw err;
 
-      // If the user has selected an invalid item ID, data attay will be empty
+          // If the user has selected an invalid item ID, data attay will be empty
 
-      if (data.length === 0) {
-        console.log('ERROR: Invalid Item ID. Please select a valid Item ID.');
-        buy();
+          if (data.length === 0) {
+            console.log('ERROR: Invalid Item ID. Please select a valid Item ID.'.bgCyan.white);
+            buy();
+            }
+           
+           else {
+            var productData = data[0];
 
-      } else {
-        var productData = data[0];
+            // If the quantity requested by the user is in stock
+            if (quantity <= productData.stock_quantity) {
+              console.log('                                                                            '.bgGreen.white);
+              console.log('   Congratulations, the product you requested is in stock! Placing order!   '.bgGreen.white);
+              console.log('                                                                            '.bgGreen.white);
+            // Construct the updating query string
+            var updateQueryStr = 'UPDATE products SET stock_quantity = ' + (productData.stock_quantity - quantity) + ' WHERE item_id = ' + item;
+            // console.log('updateQueryStr = ' + updateQueryStr);
 
-        // If the quantity requested by the user is in stock
-        if (quantity <= productData.stock_quantity) {
-          console.log('Congratulations, the product you requested is in stock! Placing order!');
+            // Update the inventory
+            connection.query(updateQueryStr, function(err, data) {
+              if (err) throw err;
+              console.log('\n   Your total is: $' + productData.price * quantity);
+              console.log('                ');
+              console.log("                                       ".bgMagenta.white)
+              console.log("   Thanks for shopping with Bamazon.   ".bgMagenta.white)
+              console.log("                                       ".bgMagenta.white)
+              // End the database connection
+              connection.end();
+            })
+        } 
 
-          // Construct the updating query string
-          var updateQueryStr = 'UPDATE products SET stock_quantity = ' + (productData.stock_quantity - quantity) + ' WHERE item_id = ' + item;
-          // console.log('updateQueryStr = ' + updateQueryStr);
-
-          // Update the inventory
-          connection.query(updateQueryStr, function(err, data) {
-            if (err) throw err;
-
-            console.log('Your total is: $' + productData.price * quantity);
-
-            // End the database connection
-            connection.end();
-          })
-        } else {
-          console.log('That item is out of stock :(');
-          console.log('Would you like to buy something else?');
+        else {
+          console.log('                                  '.bgRed.white);
+          console.log('   That item is out of stock :(   '.bgRed.white);
+          console.log('                                  '.bgRed.white);
+          console.log('                                           '.bgGreen.white);
+          console.log('   Would you like to buy something else?   '.bgGreen.white);
+          console.log('                                           '.bgGreen.white);
           buy();
         }
       }
     })
   })
 		
-  });
+ });
 }
