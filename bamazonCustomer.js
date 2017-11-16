@@ -34,10 +34,10 @@ function tableView() {
     	head: ['ID#', 'Item Name', 'Department', 'Price($)', 'Quantity Available'],
   	    colWidths: [10, 20, 20, 20, 20],
   	    style: {
-			head: ['cyan'],
-			compact: false,
-			colAligns: ['center'],
-		}
+			           head: ['cyan'],
+			           compact: false,
+			           colAligns: ['center'],
+		           }
 	});
 //Loop through the data
 	for(var i = 0; i < results.length; i++){
@@ -46,8 +46,6 @@ function tableView() {
 		);
 	}
 	console.log(table.toString());
-
-	// purchase();
 
   });
 }
@@ -62,15 +60,8 @@ function buy() {
       .prompt([
         {
           name: "choice",
-          type: "list",
-          choices: function() {
-            var choiceArray = [];
-            for (var i = 0; i < results.length; i++) {
-              choiceArray.push("ID: " + results[i].item_id + " | " + results[i].product_name);
-            }
-            return choiceArray;
-          },
-          message: "What Would you like to buy?"
+          type: "input",
+          message: "Please input the ID# of the product you want to buy?"
         },
         {
           name: "amount",
@@ -78,14 +69,51 @@ function buy() {
           message: "How many would you like to buy?"
         }
       ])
-      .then(function(answer) {
+      .then(function(input) {
         // get the information of the chosen item
-        var chosenItem;
-        for (var i = 0; i < results.length; i++) {
-          if (results[i].product_name === answer.choice) {
-            chosenItem = results[i];
-          		}
-        	}
-		});
+        var item = input.choice;
+        var quantity = input.amount;
+
+    // Query db to confirm that the given item ID exists in the desired quantity
+    var queryStr = 'SELECT * FROM products WHERE ?';
+
+    connection.query(queryStr, {item_id: item}, function(err, data) {
+      if (err) throw err;
+
+      // If the user has selected an invalid item ID, data attay will be empty
+
+      if (data.length === 0) {
+        console.log('ERROR: Invalid Item ID. Please select a valid Item ID.');
+        buy();
+
+      } else {
+        var productData = data[0];
+
+        // If the quantity requested by the user is in stock
+        if (quantity <= productData.stock_quantity) {
+          console.log('Congratulations, the product you requested is in stock! Placing order!');
+
+          // Construct the updating query string
+          var updateQueryStr = 'UPDATE products SET stock_quantity = ' + (productData.stock_quantity - quantity) + ' WHERE item_id = ' + item;
+          // console.log('updateQueryStr = ' + updateQueryStr);
+
+          // Update the inventory
+          connection.query(updateQueryStr, function(err, data) {
+            if (err) throw err;
+
+            console.log('Your total is: $' + productData.price * quantity);
+
+            // End the database connection
+            connection.end();
+          })
+        } else {
+          console.log('That item is out of stock :(');
+          console.log('Would you like to buy something else?');
+          buy();
+        }
+      }
+    })
+  })
+		
   });
 }
