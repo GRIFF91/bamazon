@@ -25,7 +25,6 @@ connection.connect(function(err) {
   console.log("                           ".bgGreen.white);
   tableView();
   buy();
-  // continueShopping();
 });
 
 // function that displays table
